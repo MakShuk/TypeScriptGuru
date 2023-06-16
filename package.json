@@ -5,8 +5,7 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "dev": "nodemon",
-    "start": "cross-env NODE_ENV=production nodemon"
+    "dev": "ts-node index.ts"
   },
   "keywords": [],
   "author": "Maksim Shuklin",
