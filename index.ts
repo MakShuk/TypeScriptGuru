@@ -1,63 +1,61 @@
-// Перечисление с названием TypesOfMedia, которое включает строчные типы video, audio
-
-enum TypesMedia {
-	VIDEO,
-	AUDIO,
+// Request
+//type Animal = 'cat' | 'dog' | 'bird';
+enum Animal {
+	CAT = 'cat',
+	DOG = 'dog',
+	BIRD = 'bird',
 }
 
-type FormatsOfMedia = '.mp4' | '.mov' | '.mkv' | '.flv' | '.webM';
-
-interface IMedia {
-	name: string;
-	type: TypesMedia;
-	format: FormatsOfMedia;
-	subtitles?: string;
-	marks?: unknown;
+interface IRequest {
+	animal: Animal;
+	breed: string;
+	sterilized?: string;
 }
 
-function checkIfArrayOfStrings(arr: any): arr is string[] {
-	if (!Array.isArray(arr)) {
-		return false;
+interface IAvailableData {
+	animal: Animal;
+	breed: string;
+	sterilized?: string;
+	location: string;
+	age?: number;
+}
+
+interface IAvailable {
+	status: 'available';
+	data: IAvailableData;
+}
+
+interface INotAvailable {
+	status: 'not available';
+	data: {
+		message: string;
+		nextUpdateIn: Date;
+	};
+}
+
+type IResponse = IAvailable | INotAvailable;
+// Response #2
+
+// {
+//     status: 'not available',
+//     data: {
+//         message: string,
+//         nextUpdateIn: Date
+//     }
+// }
+
+function isAvailableData(response: IAvailable | INotAvailable): response is IAvailable {
+	return (response as IAvailable).data.animal !== undefined;
+}
+
+/* function isCar(car: Car | Ship): car is Car {
+	return (car as Car).wheels.number !== undefined;
+}  */
+
+function checkAnimalData(animal: IResponse): string | IAvailableData {
+	if (isAvailableData(animal)) {
+		return animal.data;
+	} else {
+		return `${animal.data}, you can try in ${animal.data.nextUpdateIn}`;
 	}
-	return arr.every((item) => typeof item === 'string');
-}
-
-function playMedia(
-	{ name, type, format, subtitles, marks }: IMedia = {
-		name: 'example',
-		type: TypesMedia.VIDEO,
-		format: '.webM',
-	},
-): string {
-	let marksLog;
-	if (checkIfArrayOfStrings(marks)) {
-		for (const el of marks) {
-			marksLog = '';
-			marksLog += `${el}`;
-		}
-	}
-	if (typeof marks === 'string') {
-		marksLog = `${marks}`;
-	}
-	marksLog = `Unsupported type of marks`;
-
-	console.log(`Media ${name}${format} is ${type}
-    Marks: ${marksLog}
-    Subtitles: ${subtitles ?? 'none'}`);
-	return 'Media started';
-}
-
-playMedia({
-	name: 'WoW',
-	format: '.mov',
-	type: TypesMedia.VIDEO,
-	subtitles: 'hmhmhm hmhmhm doh',
-	marks: ['4:30', '5:40'],
-});
-
-const arr: any = ['one', 'two', 3];
-if (Array.isArray(arr)) {
-	console.log('This is an array of strings');
-} else {
-	console.log('This is not an array of strings');
 }
