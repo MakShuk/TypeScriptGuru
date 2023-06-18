@@ -1,61 +1,58 @@
-// Request
-//type Animal = 'cat' | 'dog' | 'bird';
-enum Animal {
-	CAT = 'cat',
-	DOG = 'dog',
-	BIRD = 'bird',
+interface IFormDate {
+	email: string;
+	title: string;
+	text: string;
+	checkbox: boolean;
 }
 
-interface IRequest {
-	animal: Animal;
-	breed: string;
-	sterilized?: string;
+const formData: IFormDate = {
+	email: '',
+	title: '',
+	text: '',
+	checkbox: false,
+};
+
+const emailForm = document.getElementById('emailForm') as HTMLFormElement;
+const titleForm = document.getElementById('titleForm') as HTMLFormElement;
+
+emailForm.addEventListener('submit', (event) => {
+	event.preventDefault();
+	formData.email = emailForm.email.value;
+	console.log(formData);
+	validateFormData(formData) ? checkFormData(formData) : null;
+});
+
+titleForm.addEventListener('submit', (event) => {
+	event.preventDefault();
+	formData.checkbox = titleForm.checkbox.checked;
+	formData.text = titleForm.text.value;
+	formData.title = titleForm.titleInput.value;
+	//formData.title = titleForm.title.value;
+	//formData.title = titleForm.title.value;
+	console.log(formData);
+	validateFormData(formData) ? checkFormData(formData) : null;
+});
+
+function isNotEmptyString(value: unknown): value is string {
+	return typeof value === 'string' && value.trim().length > 0;
 }
 
-interface IAvailableData {
-	animal: Animal;
-	breed: string;
-	sterilized?: string;
-	location: string;
-	age?: number;
-}
-
-interface IAvailable {
-	status: 'available';
-	data: IAvailableData;
-}
-
-interface INotAvailable {
-	status: 'not available';
-	data: {
-		message: string;
-		nextUpdateIn: Date;
-	};
-}
-
-type IResponse = IAvailable | INotAvailable;
-// Response #2
-
-// {
-//     status: 'not available',
-//     data: {
-//         message: string,
-//         nextUpdateIn: Date
-//     }
-// }
-
-function isAvailableData(response: IAvailable | INotAvailable): response is IAvailable {
-	return (response as IAvailable).data.animal !== undefined;
-}
-
-/* function isCar(car: Car | Ship): car is Car {
-	return (car as Car).wheels.number !== undefined;
-}  */
-
-function checkAnimalData(animal: IResponse): string | IAvailableData {
-	if (isAvailableData(animal)) {
-		return animal.data;
+function validateFormData({ email, title, text, checkbox }: IFormDate): boolean {
+	if (checkbox && isNotEmptyString(email) && isNotEmptyString(title) && isNotEmptyString(text)) {
+		console.log('OK');
+		return true;
 	} else {
-		return `${animal.data}, you can try in ${animal.data.nextUpdateIn}`;
+		console.log('Please, complete all fields');
+		return false;
+	}
+}
+
+function checkFormData(data: IFormDate): void {
+	const { email } = data;
+	const emails = ['example@gmail.com', 'example@ex.com', 'admin@gmail.com'];
+	if (emails.includes(email)) {
+		console.log('This email is already exist');
+	} else {
+		console.log('Posting data...');
 	}
 }
