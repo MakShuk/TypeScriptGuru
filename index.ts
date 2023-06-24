@@ -1,58 +1,130 @@
-interface IFormDate {
-	email: string;
-	title: string;
-	text: string;
-	checkbox: boolean;
+type GameTime = { total: number; inMenu: number };
+
+interface PlayerData<T, S extends string | number | GameTime> {
+	game: T;
+	hours: S;
+	server: string;
 }
 
-const formData: IFormDate = {
-	email: '',
-	title: '',
-	text: '',
-	checkbox: false,
+const player1: PlayerData<string, number> = {
+	game: 'CS:GO',
+	hours: 300,
+	server: 'basic',
 };
 
-const emailForm = document.getElementById('emailForm') as HTMLFormElement;
-const titleForm = document.getElementById('titleForm') as HTMLFormElement;
+const player2: PlayerData<number, string> = {
+	game: 2048,
+	hours: '300 h.',
+	server: 'arcade',
+};
 
-emailForm.addEventListener('submit', (event) => {
-	event.preventDefault();
-	formData.email = emailForm.email.value;
-	console.log(formData);
-	validateFormData(formData) ? checkFormData(formData) : null;
-});
+const player3: PlayerData<string, GameTime> = {
+	game: 'Chess',
+	hours: {
+		total: 500,
+		inMenu: 50,
+	},
+	server: 'chess',
+};
 
-titleForm.addEventListener('submit', (event) => {
-	event.preventDefault();
-	formData.checkbox = titleForm.checkbox.checked;
-	formData.text = titleForm.text.value;
-	formData.title = titleForm.titleInput.value;
-	//formData.title = titleForm.title.value;
-	//formData.title = titleForm.title.value;
-	console.log(formData);
-	validateFormData(formData) ? checkFormData(formData) : null;
-});
+// Массив данных с фигурами содержит объекты, у каждого из которых обязательно есть свойство name
+// Каждый объект может еще содержать дополнительные свойства в случайном виде
+// Свойство name может иметь только 4 варианта
+// Функция calculateAmountOfFigures должна принимать массив с объектами, у которых обязательно должно быть свойство name
+// Возвращает она объект-экземпляр AmountOfFigures
+// Внутри себя подсчитывает сколько каких фигур было в массиве и записывает результаты в AmountOfFigures
+// С текущими данными в консоль должно попадать:
+// { squares: 3, circles: 2, triangles: 2, others: 1 }
+type FigureName = 'rect' | 'triangle' | 'line' | 'circle' | 'squares';
 
-function isNotEmptyString(value: unknown): value is string {
-	return typeof value === 'string' && value.trim().length > 0;
+interface ShapeData {
+	name: FigureName;
+	data?: {
+		a?: number;
+		b?: number;
+		c?: number;
+		l?: number;
+		r?: number;
+	};
 }
 
-function validateFormData({ email, title, text, checkbox }: IFormDate): boolean {
-	if (checkbox && isNotEmptyString(email) && isNotEmptyString(title) && isNotEmptyString(text)) {
-		console.log('OK');
-		return true;
-	} else {
-		console.log('Please, complete all fields');
-		return false;
-	}
+interface IBaseDate {
+	a: number;
+	b: number;
 }
 
-function checkFormData(data: IFormDate): void {
-	const { email } = data;
-	const emails = ['example@gmail.com', 'example@ex.com', 'admin@gmail.com'];
-	if (emails.includes(email)) {
-		console.log('This email is already exist');
-	} else {
-		console.log('Posting data...');
-	}
+interface IFigureData<T extends IBaseDate> {
+	name: FigureName;
+	data?: T;
 }
+
+interface AmountOfFigures {
+	squares: number;
+	circles: number;
+	triangles: number;
+	others: number;
+}
+
+function calculateAmountOfFigures(figures: ShapeData[]): AmountOfFigures {
+	const result: AmountOfFigures = {
+		squares: 0,
+		circles: 0,
+		triangles: 0,
+		others: 0,
+	};
+
+	figures.forEach((figure) => {
+		switch (figure.name) {
+			case 'squares':
+				result.squares++;
+				break;
+			case 'circle':
+				result.circles++;
+				break;
+			case 'triangle':
+				result.triangles++;
+				break;
+			default:
+				result.others++;
+				break;
+		}
+	});
+
+	return result;
+}
+
+const data: ShapeData[] = [
+	{
+		name: 'rect',
+		data: { a: 5, b: 10 },
+	},
+	{
+		name: 'rect',
+		data: { a: 6, b: 11 },
+	},
+	{
+		name: 'triangle',
+		data: { a: 5, b: 10, c: 14 },
+	},
+	{
+		name: 'line',
+		data: { l: 15 },
+	},
+	{
+		name: 'circle',
+		data: { r: 10 },
+	},
+	{
+		name: 'circle',
+		data: { r: 5 },
+	},
+	{
+		name: 'rect',
+		data: { a: 15, b: 7 },
+	},
+	{
+		name: 'triangle',
+	},
+];
+
+console.log(calculateAmountOfFigures(data));
