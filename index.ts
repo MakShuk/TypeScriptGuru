@@ -1,8 +1,8 @@
 type GameTime = { total: number; inMenu: number };
 
-interface PlayerData<T, S extends string | number | GameTime> {
-	game: T;
-	hours: S;
+interface PlayerData<Game, Hours extends string | number | GameTime> {
+	game: Game;
+	hours: Hours;
 	server: string;
 }
 
@@ -35,10 +35,17 @@ const player3: PlayerData<string, GameTime> = {
 // Внутри себя подсчитывает сколько каких фигур было в массиве и записывает результаты в AmountOfFigures
 // С текущими данными в консоль должно попадать:
 // { squares: 3, circles: 2, triangles: 2, others: 1 }
-type FigureName = 'rect' | 'triangle' | 'line' | 'circle' | 'squares';
+
+enum FigureNames {
+	'reat',
+	'triangle',
+	'line',
+	'circle',
+	'squares',
+}
 
 interface ShapeData {
-	name: FigureName;
+	name: FigureNames;
 	data?: {
 		a?: number;
 		b?: number;
@@ -54,7 +61,7 @@ interface IBaseDate {
 }
 
 interface IFigureData<T extends IBaseDate> {
-	name: FigureName;
+	name: FigureNames;
 	data?: T;
 }
 
@@ -65,7 +72,7 @@ interface AmountOfFigures {
 	others: number;
 }
 
-function calculateAmountOfFigures(figures: ShapeData[]): AmountOfFigures {
+function calculateAmountOfFigures<T extends ShapeData>(figures: T[]): AmountOfFigures {
 	const result: AmountOfFigures = {
 		squares: 0,
 		circles: 0,
@@ -75,13 +82,13 @@ function calculateAmountOfFigures(figures: ShapeData[]): AmountOfFigures {
 
 	figures.forEach((figure) => {
 		switch (figure.name) {
-			case 'squares':
+			case FigureNames.squares:
 				result.squares++;
 				break;
-			case 'circle':
+			case FigureNames.circle:
 				result.circles++;
 				break;
-			case 'triangle':
+			case FigureNames.triangle:
 				result.triangles++;
 				break;
 			default:
@@ -95,35 +102,35 @@ function calculateAmountOfFigures(figures: ShapeData[]): AmountOfFigures {
 
 const data: ShapeData[] = [
 	{
-		name: 'rect',
+		name: FigureNames.reat,
 		data: { a: 5, b: 10 },
 	},
 	{
-		name: 'rect',
+		name: FigureNames.reat,
 		data: { a: 6, b: 11 },
 	},
 	{
-		name: 'triangle',
+		name: FigureNames.triangle,
 		data: { a: 5, b: 10, c: 14 },
 	},
 	{
-		name: 'line',
+		name: FigureNames.line,
 		data: { l: 15 },
 	},
 	{
-		name: 'circle',
+		name: FigureNames.circle,
 		data: { r: 10 },
 	},
 	{
-		name: 'circle',
+		name: FigureNames.circle,
 		data: { r: 5 },
 	},
 	{
-		name: 'rect',
+		name: FigureNames.squares,
 		data: { a: 15, b: 7 },
 	},
 	{
-		name: 'triangle',
+		name: FigureNames.triangle,
 	},
 ];
 
