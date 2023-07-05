@@ -36,30 +36,26 @@ const phones: IMobilePhone[] = [
 ];
 
 interface IPhonesManufacturedAfterDate extends IMobilePhone {
-	manufacturedAfterDate: Date;
+	manufacturedAfterDate: string;
 }
 
-function filterPhonesByDate<T extends IMobilePhone[], K extends keyof T[number]>(
-	phones: T,
-	key: K,
+function filterPhonesByDate<T extends IMobilePhone>(
+	phones: T[],
+	key: keyof T,
 	initial: string,
 ): IPhonesManufacturedAfterDate[] {
-	const filtered = [];
-	for (const phone of phones) {
-		if (phone.manufactured > new Date(initial)) {
-			const obj = {
-				company: phone.company,
-				number: phone.number,
-				size: phone.size,
-				companyPartner: phone.companyPartner,
-				manufactured: phone.manufactured,
-				manufacturedAfterDate: new Date(initial),
-			};
-			filtered.push(obj);
-		}
-	}
+	return phones
+		.filter((phone) => {
+			const manufactured = phone[key];
 
-	return filtered;
+			if (manufactured instanceof Date && manufactured.getTime() > new Date(initial).getTime()) {
+				return phone;
+			}
+		})
+		.map((phone) => {
+			const newObj = { ...phone, manufacturedAfterDate: initial };
+			return newObj;
+		});
 }
 
-console.log(filterPhonesByDate(phones, 'company', '2022-01-01'));
+console.log(filterPhonesByDate(phones, 'manufactured', '2022-01-01'));
