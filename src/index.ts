@@ -39,11 +39,11 @@ interface IPhonesManufacturedAfterDate extends IMobilePhone {
 	manufacturedAfterDate: string;
 }
 
-function filterPhonesByDate<T extends IMobilePhone>(
+function filterPhonesByDate<T>(
 	phones: T[],
 	key: keyof T,
 	initial: string,
-): IPhonesManufacturedAfterDate[] {
+): Partial<IPhonesManufacturedAfterDate>[] {
 	return phones
 		.filter((phone) => {
 			const manufactured = phone[key];
