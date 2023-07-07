@@ -1,61 +1,98 @@
-interface IPhone {
-	company: string;
-	number: number;
+interface IClasses {
+	name: string;
+	startsAt: string;
+	duration: number;
 }
 
-type PhoneCompanyType = IPhone['company'];
-
-interface IMobilePhone extends IPhone {
-	size: string;
-	companyPartner: PhoneCompanyType;
-	manufactured: Date;
+interface IWillStartsAt extends Omit<IClasses, 'startsAt'> {
+	willStartsAt: string;
 }
 
-const phones: IMobilePhone[] = [
-	{
-		company: 'Nokia',
-		number: 1285637,
-		size: '5.5',
-		companyPartner: 'MobileNokia',
-		manufactured: new Date('2022-09-01'),
-	},
-	{
-		company: 'Samsung',
-		number: 4356637,
-		size: '5.0',
-		companyPartner: 'SamMobile',
-		manufactured: new Date('2021-11-05'),
-	},
-	{
-		company: 'Apple',
-		number: 4552833,
-		size: '5.7',
-		companyPartner: 'no data',
-		manufactured: new Date('2022-05-24T12:00:00'),
-	},
-];
-
-interface IPhonesManufacturedAfterDate extends IMobilePhone {
-	manufacturedAfterDate: string;
+interface ICurrClients extends Pick<IClasses, 'name'> {
+	age: number | string;
+	gender: string;
+	timeLeft: string;
 }
 
-function filterPhonesByDate<T>(
-	phones: T[],
-	key: keyof T,
-	initial: string,
-): Partial<IPhonesManufacturedAfterDate>[] {
-	return phones
-		.filter((phone) => {
-			const manufactured = phone[key];
-
-			if (manufactured instanceof Date && manufactured.getTime() > new Date(initial).getTime()) {
-				return phone;
-			}
-		})
-		.map((phone) => {
-			const newObj = { ...phone, manufacturedAfterDate: initial };
-			return newObj;
-		});
+interface IExClients extends Omit<ICurrClients, 'timeLeft'> {
+	makeCallFor: Date;
 }
 
-console.log(filterPhonesByDate(phones, 'manufactured', '2022-01-01'));
+type IFutureClients = Pick<IExClients, 'name' | 'makeCallFor'>;
+
+interface IFitnessClubCenter {
+	clubName: string;
+	location: string;
+	classes: IClasses[];
+	futureClasses: IWillStartsAt[];
+	currClients: ICurrClients[];
+	exClients: IExClients[];
+	futureClients: IFutureClients[];
+}
+const fitnessClubCenter: IFitnessClubCenter = {
+	clubName: 'Fitness club Center',
+	location: 'central ave. 45, 5th floor',
+	classes: [
+		{
+			name: 'yoga',
+			startsAt: '8:00 AM',
+			duration: 60,
+		},
+		{
+			name: 'trx',
+			startsAt: '11:00 AM',
+			duration: 45,
+		},
+		{
+			name: 'swimming',
+			startsAt: '3:00 PM',
+			duration: 70,
+		},
+	],
+	futureClasses: [
+		{
+			name: 'boxing',
+			willStartsAt: '6:00 PM',
+			duration: 40,
+		},
+		{
+			name: 'breath training',
+			willStartsAt: '8:00 PM',
+			duration: 30,
+		},
+	],
+	currClients: [
+		{
+			name: 'John Smith',
+			age: '-',
+			gender: 'male',
+			timeLeft: '1 month',
+		},
+		{
+			name: 'Alise Smith',
+			age: 35,
+			gender: 'female',
+			timeLeft: '3 month',
+		},
+		{
+			name: 'Ann Sonne',
+			age: 24,
+			gender: 'female',
+			timeLeft: '5 month',
+		},
+	],
+	exClients: [
+		{
+			name: 'Tom Smooth',
+			age: 50,
+			gender: 'male',
+			makeCallFor: new Date('2023-08-12'),
+		},
+	],
+	futureClients: [
+		{
+			name: 'Maria',
+			makeCallFor: new Date('2023-07-10'),
+		},
+	],
+};
