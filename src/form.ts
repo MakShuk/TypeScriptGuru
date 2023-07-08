@@ -1,19 +1,22 @@
 interface IForm {
-	login: ILoginForm;
-	password: ILoginForm;
+	login: string;
+	password: string;
 }
 
 interface ILoginForm {
 	isValid: boolean;
-	errorMsg?: string;
+	errorMsg: string;
 }
 
-interface ILoginForm {
+interface IPassForm {
 	isValid: boolean;
-	errorMsg?: string;
 }
 
-const validationData: IForm = {
+type Validation<T> = {
+	[P in keyof T]: ILoginForm | IPassForm;
+};
+
+const validationData: Validation<IForm> = {
 	login: { isValid: false, errorMsg: 'At least 3 characters' },
 	password: { isValid: true },
 };

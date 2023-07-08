@@ -40,7 +40,7 @@ const customSliderOptions: ICustomSliderOptions = {
 	arrows: true,
 };
 
-function createCustomSlider(options: any): void {
+function createCustomSlider(options: ICustomSliderOptions): void {
 	if ('container' in options) {
 		console.log(options);
 	}
