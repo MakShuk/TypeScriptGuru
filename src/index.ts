@@ -1,62 +1,87 @@
-enum TransferStatus {
-	Pending = 'pending',
-	Rejected = 'rejected',
-	Completed = 'completed',
+interface Queue<T> {
+	enqueue(item: T): void;
+	dequeue(): T | undefined;
+	peek(): T | undefined | null;
+	isEmpty(): boolean;
+	length(): number;
 }
 
-enum ErrorMessages {
-	NotFound = 'Not found: 404',
-	NotEnoughSpace = 'Not enough space: 507',
-	Forbidden = 'Forbidden: 403',
-}
-
-interface ITransfer {
-	path: string;
-	data: string[];
-	date?: Date;
-	start: (p: string, d: string[]) => string;
-	stop: (reason: string) => string;
-}
-
-interface TransferError {
-	message: ErrorMessages;
-}
-
-// Класс должен имплементировать ITransfer и TransferError
-class SingleFileTransfer implements ITransfer, TransferError {
-	message: ErrorMessages;
-	path: string;
-	data: string[];
-	date?: Date | undefined;
-	status: TransferStatus;
+class ArrayQueue<T> implements Queue<T> {
+	private queue: T[];
 	constructor() {
-		this.status = TransferStatus.Pending;
+		this.queue = [];
 	}
-
-	start(p: string, d: string[]): string {
-		this.status = TransferStatus.Pending;
-		return `p: ${p} d: ${d.join(' ')}`;
+	enqueue(item: T): void {
+		this.queue.push(item);
 	}
-	stop(reason: string): string {
-		this.status = TransferStatus.Completed;
-		return `${new Date()}: Transfer: ${this.status}, reason: ${reason};`;
+	dequeue(): T | undefined {
+		if (this.isEmpty()) throw Error('queue is empty');
+		return this.queue.shift();
 	}
-
-	checkTransferStatus(): string {
-		return this.status;
+	peek(): T | null | undefined {
+		if (this.isEmpty()) throw Error('queue is empty');
+		return this.queue[0];
 	}
-
-	getError(): string {
-		return `Transfer status:${this.status}, error ${ErrorMessages.Forbidden}`;
+	isEmpty(): boolean {
+		return this.queue.length === 0;
 	}
-
-	// Необходимо создать метод, который будет останавливать передачу данных
-	// И возвращать строку с причиной и датой остановки (Дата в любом формате)
-	// Необходимо создать метод, который будет возвращать строку, содержащую
-	// Статус передачи и любое сообщение об ошибке. На ваш выбор или отталкиваться от приходящего аргумента
-	// Метод может показаться странным, но может использоваться для тестов, например
+	length(): number {
+		return this.queue.length;
+	}
 }
 
-const res = new SingleFileTransfer();
-console.log(res.checkTransferStatus());
-console.log(res.stop('not data'));
+class Stack<T> {
+	private stack: T[] = [];
+	constructor(private limit: number = Number.MAX_VALUE) {}
+
+	push(value: T): void {
+		if (this.limit === this.stack.length) throw Error('stack is empty');
+		this.stack.push(value);
+	}
+
+	pop(): T | undefined {
+		if (this.isEmpty()) throw Error('stack is empty');
+		return this.stack.pop();
+	}
+
+	length(): number {
+		return this.stack.length;
+	}
+
+	isEmpty(): boolean {
+		return this.stack.length === 0;
+	}
+
+	top(): T | null {
+		if (this.isEmpty()) return null;
+		return this.stack[this.stack.length - 1];
+	}
+}
+
+const arrTest1 = new ArrayQueue<number>();
+arrTest1.enqueue(5);
+arrTest1.enqueue(10);
+console.log(arrTest1.peek());
+console.log(arrTest1.dequeue());
+console.log(arrTest1.length());
+
+const arrTest2 = new ArrayQueue<string>();
+arrTest2.enqueue('5');
+arrTest2.enqueue('10');
+console.log(arrTest2.peek());
+console.log(arrTest2.dequeue());
+console.log(arrTest2.length());
+
+const stackTest1 = new Stack<number>(10);
+stackTest1.push(20);
+stackTest1.push(50);
+console.log(stackTest1.top());
+console.log(stackTest1.pop());
+console.log(stackTest1.length());
+
+const stackTest2 = new Stack<string>(10);
+stackTest2.push('20');
+stackTest2.push('50');
+console.log(stackTest2.top());
+console.log(stackTest2.pop());
+console.log(stackTest2.length());
