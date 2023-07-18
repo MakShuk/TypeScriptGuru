@@ -1,87 +1,132 @@
-interface Queue<T> {
-	enqueue(item: T): void;
-	dequeue(): T | undefined;
-	peek(): T | undefined | null;
-	isEmpty(): boolean;
-	length(): number;
+import 'reflect-metadata';
+
+interface ICuboid {
+	width: number;
+	length: number;
+	height: number;
+	calcArea: (multiply?: number) => number;
+	calcVolume: (multiply?: number) => number;
 }
 
-class ArrayQueue<T> implements Queue<T> {
-	private queue: T[];
-	constructor() {
-		this.queue = [];
-	}
-	enqueue(item: T): void {
-		this.queue.push(item);
-	}
-	dequeue(): T | undefined {
-		if (this.isEmpty()) throw Error('queue is empty');
-		return this.queue.shift();
-	}
-	peek(): T | null | undefined {
-		if (this.isEmpty()) throw Error('queue is empty');
-		return this.queue[0];
-	}
-	isEmpty(): boolean {
-		return this.queue.length === 0;
-	}
-	length(): number {
-		return this.queue.length;
-	}
-}
+@closeCar
+class ShippingContainer implements ICuboid {
+	@IsInt()
+	@Min(1)
+	width: number;
 
-class Stack<T> {
-	private stack: T[] = [];
-	constructor(private limit: number = Number.MAX_VALUE) {}
+	@IsInt()
+	@Min(1)
+	length: number;
 
-	push(value: T): void {
-		if (this.limit === this.stack.length) throw Error('stack is empty');
-		this.stack.push(value);
+	@IsInt()
+	@Min(1)
+	@Max(8)
+	height: number;
+	lastCalculation: string;
+	createdAt: Date;
+
+	constructor(width: number, length: number, height: number) {
+		this.width = width;
+		this.length = length;
+		this.height = height;
+		validate(this, 'width', width);
+		validate(this, 'length', length);
+		validate(this, 'height', height);
 	}
 
-	pop(): T | undefined {
-		if (this.isEmpty()) throw Error('stack is empty');
-		return this.stack.pop();
+	@fixLastCalculation('calcArea')
+	calcArea(multiply?: number): number {
+		return this.width * this.length * (multiply ? multiply : 1);
 	}
 
-	length(): number {
-		return this.stack.length;
-	}
-
-	isEmpty(): boolean {
-		return this.stack.length === 0;
-	}
-
-	top(): T | null {
-		if (this.isEmpty()) return null;
-		return this.stack[this.stack.length - 1];
+	@fixLastCalculation('calcVolume')
+	calcVolume(multiply?: number): number {
+		return this.width * this.length * this.height * (multiply ? multiply : 1);
 	}
 }
 
-const arrTest1 = new ArrayQueue<number>();
-arrTest1.enqueue(5);
-arrTest1.enqueue(10);
-console.log(arrTest1.peek());
-console.log(arrTest1.dequeue());
-console.log(arrTest1.length());
+type ShippingContainerData = {
+	lastCalculation: string;
+	createdAt: Date;
+};
 
-const arrTest2 = new ArrayQueue<string>();
-arrTest2.enqueue('5');
-arrTest2.enqueue('10');
-console.log(arrTest2.peek());
-console.log(arrTest2.dequeue());
-console.log(arrTest2.length());
+const container = new ShippingContainer(10, 100, 7) as ICuboid & ShippingContainerData;
+container.width = 5;
+container.height = 5;
+console.log(container.createdAt);
+console.log(container.calcVolume());
+console.log(container.lastCalculation);
 
-const stackTest1 = new Stack<number>(10);
-stackTest1.push(20);
-stackTest1.push(50);
-console.log(stackTest1.top());
-console.log(stackTest1.pop());
-console.log(stackTest1.length());
+finalValidate(container);
 
-const stackTest2 = new Stack<string>(10);
-stackTest2.push('20');
-stackTest2.push('50');
-console.log(stackTest2.top());
-console.log(stackTest2.pop());
-console.log(stackTest2.length());
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+function closeCar<T extends { new (...args: any[]): {} }>(constructor: T) {
+	return class extends constructor {
+		createdAt = new Date();
+	};
+}
+
+function fixLastCalculation(message: string) {
+	return function (
+		target: Object,
+		propertyKey: string | symbol,
+		descriptor: PropertyDescriptor,
+	): PropertyDescriptor | void {
+		const originalMethod = descriptor.value;
+		descriptor.value = function (this: any, ...args: any[]): any {
+			this.lastCalculation = `Последний подсчет ${message} был ${new Date()}`;
+			return originalMethod.apply(this, args);
+		};
+	};
+}
+
+function IsInt() {
+	return function (target: any, propertyKey: string): void {
+		Reflect.defineMetadata('IsInt', true, target, propertyKey);
+	};
+}
+
+function Min(value: number) {
+	return function (target: any, propertyKey: string): void {
+		Reflect.defineMetadata('Min', value, target, propertyKey);
+	};
+}
+
+function Max(value: number) {
+	return function (target: any, propertyKey: string): void {
+		Reflect.defineMetadata('Max', value, target, propertyKey);
+	};
+}
+
+function finalValidate(obj: unknown): void {
+	if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+		for (const key in obj) {
+			validate(obj, key, obj[key as keyof typeof obj]);
+		}
+	}
+}
+
+function validate(target: Object, propertyKey: string, value: any): void {
+	if (
+		Reflect.getMetadata('IsInt', target, propertyKey) &&
+		(!Number.isInteger(value) || value !== parseInt(value))
+	) {
+		throw new Error(`property ${propertyKey} should be an integer`);
+	}
+	if (
+		Reflect.hasMetadata('Min', target, propertyKey) &&
+		value < Reflect.getMetadata('Min', target, propertyKey)
+	) {
+		throw new Error(
+			`min value for ${propertyKey} is ${Reflect.getMetadata('Min', target, propertyKey)}`,
+		);
+	}
+	if (
+		Reflect.hasMetadata('Max', target, propertyKey) &&
+		value > Reflect.getMetadata('Max', target, propertyKey)
+	) {
+		throw new Error(
+			`max value for ${propertyKey} is ${Reflect.getMetadata('Max', target, propertyKey)}`,
+		);
+	}
+}
